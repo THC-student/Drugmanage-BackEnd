@@ -2,11 +2,11 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://124.71.86.161:3306/manage
+    url: jdbc:mysql://XXX:3306/manage
     username: root
     password: 123456
   rabbitmq:
-    host: 124.71.86.161 # rabbitMQ的ip地址
+    host: XXX # rabbitMQ的ip地址
     port: 5672 # 端口
     username: admin
     password: admin
@@ -15,8 +15,8 @@ spring:
       simple:
         prefetch: 1
   redis:
-    host: 124.71.86.161
-    password: redis-Thc20040717
+    host: XXX
+    password: XXX
     port: 6379
     lettuce:
       pool:
@@ -28,7 +28,7 @@ spring:
     allow-circular-references: true
   data:
     redis:
-      host: 124.71.86.161
+      host: XXX
       port: 6379
       lettuce:
         pool:
@@ -44,10 +44,10 @@ mybatis-plus:
 #阿里云OSS配置
 aliyun:
   oss:
-    endpoint: https://oss-cn-beijing.aliyuncs.com
-    accessKeyId: LTAI5tPXy4nuA5WvwqxpyXY1
-    accessKeySecret: NV1uwM1CiMDbhLRXUEx8Tv8aVKH9I3
-    bucketName: qhglhh
+    endpoint: XXX
+    accessKeyId: XXX
+    accessKeySecret: XXX
+    bucketName: XXX
 #spring事务管理日志
 logging:
   level:
