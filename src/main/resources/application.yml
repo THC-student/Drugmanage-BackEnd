@@ -1,0 +1,56 @@
+#驱动类名称
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://124.71.86.161:3306/manage
+    username: root
+    password: 123456
+  rabbitmq:
+    host: 124.71.86.161 # rabbitMQ的ip地址
+    port: 5672 # 端口
+    username: admin
+    password: admin
+    virtual-host: /
+    listener:
+      simple:
+        prefetch: 1
+  redis:
+    host: 124.71.86.161
+    password: redis-Thc20040717
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 10
+        max-idle: 10
+        min-idle: 1
+        time-between-eviction-runs: 10s
+  main:
+    allow-circular-references: true
+  data:
+    redis:
+      host: 124.71.86.161
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s
+#mybatis配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+#阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    accessKeyId: LTAI5tPXy4nuA5WvwqxpyXY1
+    accessKeySecret: NV1uwM1CiMDbhLRXUEx8Tv8aVKH9I3
+    bucketName: qhglhh
+#spring事务管理日志
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+server:
+  port: 8080
