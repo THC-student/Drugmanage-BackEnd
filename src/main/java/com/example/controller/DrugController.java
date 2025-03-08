@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.pojo.Drug;
+import com.example.pojo.GetDrugByNameBack;
 import com.example.pojo.Result;
 import com.example.service.DrugService;
 import lombok.extern.slf4j.Slf4j;
@@ -81,5 +82,13 @@ public class DrugController {
         Map<String,Integer> back= drugService.getNumberOfDrug();
         return Result.success(back);
     }
+
+    @GetMapping("/getDrugByName")
+    private Result getDrugByName(@RequestParam String drugName){
+        List<Drug> drugList=drugService.getDrugByName(drugName);
+        GetDrugByNameBack getDrugByNameBack = new GetDrugByNameBack(drugList, drugList.size());
+        return Result.success(getDrugByNameBack);
+    }
+
 }
 

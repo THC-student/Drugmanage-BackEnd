@@ -1,9 +1,11 @@
 package com.example.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.mapper.DrugMapper;
 import com.example.pojo.Drug;
+import com.example.pojo.GetDrugByNameBack;
 import com.example.service.DrugService;
 import com.example.utils.AliOSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,5 +107,14 @@ public class DrugServiceImpl extends ServiceImpl<DrugMapper, Drug> implements Dr
             back.merge(drug.getDrugName(), drug.getDrugNumber(), Integer::sum);
         }
         return back;
+    }
+
+    @Override
+    public List<Drug> getDrugByName(String drugName) {
+        QueryWrapper<Drug> queryWrapper = new QueryWrapper<>();
+        // 构建模糊查询条件，这里的"%drugName%"表示drugName可以出现在任意位置
+        queryWrapper.like("drug_name", drugName);
+        // 执行查询
+        return list(queryWrapper);
     }
 }

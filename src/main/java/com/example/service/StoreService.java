@@ -19,4 +19,6 @@ public interface StoreService extends IService<Store> {
     void deleteStoreById(Integer storeId);
 
     void changeStore(Store store);
+
+    List<Store> StorePageByDrugId(Integer pageNum, Integer sampleId, Integer drugId);
 }

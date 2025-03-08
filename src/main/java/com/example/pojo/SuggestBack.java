@@ -13,4 +13,5 @@ public class SuggestBack {
    private Integer userJudge;
    private String content;
    private String time;
+   private String msgId;
 }

@@ -67,4 +67,12 @@ public class StoreController {
         storeService.changeStore(store);
         return Result.success("修改成功");
     }
+    @GetMapping("/StorePageByDrugId")
+    private  Result StorePageByDrugId(@RequestParam Integer pageNum,@RequestParam Integer sampleId,@RequestParam Integer drugId){
+        System.out.println("pageNum"+pageNum);
+        System.out.println("sampleId"+sampleId);
+        System.out.println("drugId"+drugId);
+        List < Store> back=storeService.StorePageByDrugId(pageNum,sampleId,drugId);
+        return Result.success(back);
+    }
 }

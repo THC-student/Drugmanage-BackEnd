@@ -36,4 +36,8 @@ public interface UserService extends IService<User> {
     List<SuggestBack> useGetSuggest();
 
     void reloadSuggest(List<SuggestBack> suggestBacks);
+
+    void newSuggest(SuggestBack newSuggest);
+
+    void deleteSuggestById(String msgId);
 }

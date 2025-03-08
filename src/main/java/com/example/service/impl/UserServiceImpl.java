@@ -8,14 +8,19 @@ import com.example.pojo.*;
 import com.example.service.UserService;
 import com.example.utils.JwtUtils;
 import com.example.utils.SHA256Utils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -26,6 +31,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -134,6 +142,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<User> userList = userMapper.selectList(null);
         return userList.size();
     }
+    @Override
+    public void newSuggest(SuggestBack newSuggest) {
+        String redisKeyPrefix = "MSG_ID:";
+        String msgId = newSuggest.getMsgId();
+        String key = redisKeyPrefix + msgId;
+        String value = jsonify(newSuggest);
+        stringRedisTemplate.opsForValue().set(key, value);
+        stringRedisTemplate.expire(key, 30, java.util.concurrent.TimeUnit.DAYS);
+    }
 
     @Override
     public SuggestBack useSetSuggest(SuggestInfo suggestInfo) {
@@ -147,23 +164,83 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Integer userJudge=user.getUserJudge();
         String userHeader=user.getUserHeader();
 
-        SuggestBack suggestBack = new SuggestBack(userName,userHeader,userJudge,content,time);
+        String redisKeyPrefix = "MSG_ID:";
+        String msgId = suggestInfo.getMsgId();
+        String key = redisKeyPrefix + msgId;
+        SuggestBack suggestBack = new SuggestBack(userName,userHeader,userJudge,content,time,msgId);
         rabbitTemplate.convertAndSend("exceptionSuggestQueue", suggestBack);
+        String value = jsonify(suggestBack);
+        stringRedisTemplate.opsForValue().set(key, value);
+        stringRedisTemplate.expire(key, 30, java.util.concurrent.TimeUnit.DAYS);
         return suggestBack;
     }
 
     @Override
     public List<SuggestBack> useGetSuggest() {
-        List<SuggestBack> list=new ArrayList<>();
-        while(true){
-            SuggestBack suggestBack = (SuggestBack) rabbitTemplate.receiveAndConvert("exceptionSuggestQueue");
-            if(suggestBack==null){
-                break;
+        // 定义 Redis 中的键前缀
+        String redisKeyPrefix = "MSG_ID:";
+
+        // 获取所有以 MSG_ID: 开头的键
+        Set<String> keys = stringRedisTemplate.keys(redisKeyPrefix + "*");
+
+        List<SuggestBack> suggestBackList = new ArrayList<>();
+
+        if (keys != null && !keys.isEmpty()) {
+            for (String key : keys) {
+                // 获取键对应的 JSON 字符串
+                String value = stringRedisTemplate.opsForValue().get(key);
+                if (value != null) {
+                    // 将 JSON 字符串反序列化为 SuggestBack 对象
+                    SuggestBack suggestBack = parseJson(value);
+                    if (suggestBack != null) {
+                        suggestBackList.add(suggestBack);
+                    }
+                }
             }
-            list.add(suggestBack);
         }
-        return list;
+        return suggestBackList;
     }
+
+    @Override
+    public void deleteSuggestById(String msgId) {
+        if (msgId == null || msgId.isEmpty()) {
+            System.out.println("msgId is invalid: " + msgId);
+            return ;
+        }
+
+        String redisKeyPrefix = "MSG_ID:";
+        String key = redisKeyPrefix + msgId;
+        stringRedisTemplate.delete(key);
+        return ;
+    }
+
+    public List<SuggestBack> getAllSuggests() {
+        // 定义 Redis 中的键前缀
+        String redisKeyPrefix = "MSG_ID:";
+
+        // 获取所有以 MSG_ID: 开头的键
+        Set<String> keys = stringRedisTemplate.keys(redisKeyPrefix + "*");
+
+        List<SuggestBack> suggestBackList = new ArrayList<>();
+
+        if (keys != null && !keys.isEmpty()) {
+            for (String key : keys) {
+                // 获取键对应的 JSON 字符串
+                String value = stringRedisTemplate.opsForValue().get(key);
+                if (value != null) {
+                    // 将 JSON 字符串反序列化为 SuggestBack 对象
+                    SuggestBack suggestBack = parseJson(value);
+                    if (suggestBack != null) {
+                        suggestBackList.add(suggestBack);
+                    }
+                }
+            }
+        }
+
+        return suggestBackList;
+    }
+
+
 
     @Override
     public void reloadSuggest(List<SuggestBack> suggestBacks) {
@@ -171,5 +248,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             rabbitTemplate.convertAndSend("exceptionSuggestQueue", suggestBacks.get(i));
         }
         return;
+    }
+
+
+
+
+    private String jsonify(SuggestBack suggestBack) {
+        // 或者使用 Jackson 的 ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(suggestBack);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private SuggestBack parseJson(String jsonString) {
+        // 使用 JSON 工具将 JSON 字符串反序列化为 SuggestBack 对象
+        // 这里假设你有一个工具类或方法来完成 JSON 反序列化
+
+        // 示例：使用 Jackson 的 ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(jsonString, SuggestBack.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

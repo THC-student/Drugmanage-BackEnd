@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 public class SuggestInfo {
     private Integer userId;
     private String content;
+    private String msgId;
 }

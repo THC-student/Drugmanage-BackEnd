@@ -2,12 +2,16 @@ package com.example.controller;
 
 import com.example.pojo.*;
 import com.example.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RequestMapping("/useController")
@@ -31,6 +35,7 @@ public class UseController {
 
     @PostMapping("/login")
     public Result Login(@RequestBody User user){
+        System.out.println(user);
         LoginBack loginBack= userService.Login(user);
         if(loginBack==null){
             return Result.error("账号或密码错误");
@@ -121,5 +126,16 @@ public class UseController {
     private Result reloadSuggest(@RequestBody List<SuggestBack> suggestBacks){
         userService.reloadSuggest(suggestBacks);
         return Result.success("回填成功");
+    }
+
+    @PostMapping("/newSuggest")
+    private Result newSuggest(@RequestBody SuggestBack newSuggest){
+        userService.newSuggest(newSuggest);
+        return Result.success("新增成功");
+    }
+    @GetMapping("/deleteSuggestById")
+    private Result deleteSuggestById(@RequestParam String msgId){
+        userService.deleteSuggestById(msgId);
+        return Result.success("删除成功");
     }
 }

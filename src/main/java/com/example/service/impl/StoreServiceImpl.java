@@ -64,4 +64,16 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper,Store> implements 
         storeMapper.updateById(store);
         return ;
     }
+
+    @Override
+    public List<Store> StorePageByDrugId(Integer pageNum, Integer sampleId, Integer drugId) {
+        Integer pageSize=8;
+        Page<Store> page = Page.of(pageNum, pageSize);
+        QueryWrapper<Store> storeQueryWrapper = new QueryWrapper<>();
+        storeQueryWrapper.eq("sample_id",sampleId);
+        storeQueryWrapper.eq("drug_id",drugId);
+        Page<Store> storePage = storeMapper.selectPage(page, storeQueryWrapper);
+        List<Store> records = storePage.getRecords();
+        return records;
+    }
 }

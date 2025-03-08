@@ -28,4 +28,6 @@ public interface DrugService extends IService<Drug> {
     Map<Integer, Integer> getTypeofDrug();
 
     Map<String, Integer> getNumberOfDrug();
+
+    List<Drug> getDrugByName(String drugName);
 }
